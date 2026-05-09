@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NL → App Compiler | AI Platform Engineer Demo</title>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="logo">⚙</div>
+      <div>
+        <h1>NL → App Compiler</h1>
+        <p>Natural language → Intent → Architecture → Schema → Validation → Executable output</p>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-purple">Multi-stage pipeline</span>
+      <span class="badge badge-teal">No API key required</span>
+      <span class="badge badge-blue">Works offline</span>
+    </div>
+  </div>
+
+  <!-- PIPELINE BAR -->
+  <div class="pipeline-bar">
+    <div class="stage-pill" id="s0">① Intent Extraction</div>
+    <div class="arrow">›</div>
+    <div class="stage-pill" id="s1">② System Design</div>
+    <div class="arrow">›</div>
+    <div class="stage-pill" id="s2">③ Schema Generation</div>
+    <div class="arrow">›</div>
+    <div class="stage-pill" id="s3">④ Validation + Repair</div>
+    <div class="arrow">›</div>
+    <div class="stage-pill" id="s4">⑤ Execution Check</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- LEFT PANEL -->
+    <div class="left-panel">
+      <div class="field-group">
+        <label>App description</label>
+        <textarea id="promptInput" placeholder="e.g. Build a CRM with login, contacts, dashboard, role-based access, and premium plan with payments. Admins can see analytics."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Quick examples</label>
+        <div class="examples">
+          <button class="ex-btn" onclick="setEx(this)">Build a CRM with login, contacts, dashboard, role-based access, and premium plan with payments. Admins can see analytics.</button>
+          <button class="ex-btn" onclick="setEx(this)">Task manager with teams, deadlines, file attachments, notifications, and Kanban board.</button>
+          <button class="ex-btn" onclick="setEx(this)">E-commerce store with product catalog, cart, checkout, order tracking, and admin panel.</button>
+          <button class="ex-btn" onclick="setEx(this)">Online learning platform with courses, video lessons, quizzes, progress tracking, and certificates.</button>
+          <button class="ex-btn edge" onclick="setEx(this)">⚡ Edge: Make something</button>
+          <button class="ex-btn edge" onclick="setEx(this)">⚡ Edge: A social platform but also payments and AI and admin and mobile and fast.</button>
+          <button class="ex-btn edge" onclick="setEx(this)">⚡ Edge: CRM</button>
+        </div>
+      </div>
+
+      <button class="run-btn" id="runBtn" onclick="runPipeline()">▶ Run Pipeline</button>
+
+      <div class="field-group">
+        <label>Pipeline log</label>
+        <div class="log-box" id="logBox"><span class="muted">Awaiting input…</span></div>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid" style="display:none">
+        <div class="mcard"><div class="mval" id="mLatency">–</div><div class="mlabel">Latency (ms)</div></div>
+        <div class="mcard"><div class="mval" id="mRepairs">–</div><div class="mlabel">Repairs made</div></div>
+        <div class="mcard"><div class="mval" id="mStages">–</div><div class="mlabel">Stages passed</div></div>
+        <div class="mcard"><div class="mval" id="mExec">–</div><div class="mlabel">Exec score</div></div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="empty-state" id="emptyState">
+        <div style="font-size:48px;opacity:0.2">⚙</div>
+        <p>Enter a prompt and run the pipeline.</p>
+        <p class="muted" style="margin-top:6px;font-size:13px">Output appears across Intent / Architecture / Schema / Exec tabs.</p>
+      </div>
+
+      <div id="outputArea" style="display:none">
+        <div class="notice notice-amber" id="repairNotice" style="display:none">
+          🔧 <strong>Auto-repair triggered</strong> — inconsistencies detected and fixed automatically (no full retry).
+        </div>
+        <div class="notice notice-blue" id="ambigNotice" style="display:none">
+          ⚠ <strong>Ambiguous/vague prompt.</strong> Reasonable assumptions made — see Intent tab.
+        </div>
+
+        <div class="tabs">
+          <button class="tab active" onclick="showTab('intent')">Intent</button>
+          <button class="tab" onclick="showTab('design')">Architecture</button>
+          <button class="tab" onclick="showTab('schema')">Full Schema</button>
+          <button class="tab" onclick="showTab('exec')">Exec Check</button>
+        </div>
+
+        <pre class="json-box" id="tab-intent"></pre>
+        <pre class="json-box" id="tab-design" style="display:none"></pre>
+        <pre class="json-box" id="tab-schema" style="display:none"></pre>
+        <pre class="json-box" id="tab-exec"   style="display:none"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVALUATION SECTION -->
+  <div class="eval-section">
+    <h2>Evaluation framework — 20 test cases</h2>
+    <p class="muted" style="font-size:13px;margin:4px 0 12px">10 real product prompts + 10 edge cases (vague / conflicting / incomplete). Tracks success rate, repairs, latency.</p>
+    <button class="run-btn" id="evalBtn" onclick="runEval()" style="width:auto;padding:9px 22px">▶ Run Full Evaluation</button>
+    <div id="evalArea" style="display:none;margin-top:1.25rem">
+      <table class="eval-table">
+        <thead>
+          <tr><th>#</th><th>Prompt</th><th>Type</th><th>Status</th><th>Repairs</th><th>Score</th><th>Latency</th></tr>
+        </thead>
+        <tbody id="evalBody"></tbody>
+      </table>
+      <div class="metrics-grid" id="evalSummary" style="margin-top:1rem"></div>
+    </div>
+  </div>
+
+</div>
+<script src="engine.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
